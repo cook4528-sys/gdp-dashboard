@@ -180,29 +180,11 @@ HAS_DATE = "date" in df.columns
 if page == "① 개요":
     st.subheader("① 개요 · 프로젝트 설명 및 핵심 지표 요약")
 
-    # ---- 분석 기간 선택 (이 페이지 전용) ----
+    # 기본 필터 데이터프레임
+    filtered_df = df.copy()
     if HAS_DATE:
         min_date = df["date"].min()
         max_date = df["date"].max()
-        date_range = st.date_input(
-            "분석 기간 선택",
-            value=(min_date, max_date),
-            min_value=min_date,
-            max_value=max_date,
-            key="overview_date_range",
-        )
-
-        if isinstance(date_range, tuple):
-            start_date, end_date = date_range
-        else:
-            start_date, end_date = min_date, date_range
-
-        filtered_df = df[
-            (df["date"] >= start_date) & (df["date"] <= end_date)
-        ].copy()
-    else:
-        filtered_df = df.copy()
-        st.info("date 컬럼이 없어 전체 기간 기준으로 표시합니다.")
 
     col_overview_left, col_overview_right = st.columns([2.2, 1])
 
@@ -221,11 +203,35 @@ if page == "① 개요":
                 """
             )
 
+        # ----------------- KPI 헤더 + 기간 선택 (같은 줄 / 슬라이더) -----------------
+        if HAS_DATE:
+            kpi_title_col, kpi_date_col = st.columns([1.4, 2.0])
+            with kpi_title_col:
+                st.markdown("#### 기간 내 주요 지표 평균 (Kalman 처리 기준)")
+            with kpi_date_col:
+                date_range = st.slider(
+                    "분석 기간 선택",
+                    min_value=min_date,
+                    max_value=max_date,
+                    value=(min_date, max_date),
+                    key="overview_date_range",
+                )
+
+            if isinstance(date_range, tuple):
+                start_date, end_date = date_range
+            else:
+                start_date, end_date = min_date, date_range
+
+            filtered_df = df[
+                (df["date"] >= start_date) & (df["date"] <= end_date)
+            ].copy()
+        else:
+            st.markdown("#### 기간 내 주요 지표 평균 (Kalman 처리 기준)")
+            st.info("date 컬럼이 없어 전체 기간 기준으로 표시합니다.")
+
         # ----------------- KPI (분석기간 평균) -----------------
         if not filtered_df.empty:
             avg_values = filtered_df.mean(numeric_only=True)
-
-            st.markdown("#### 기간 내 주요 지표 평균 (Kalman 처리 기준)")
 
             k1, k2, k3, k4 = st.columns(4)
 
@@ -378,10 +384,8 @@ if page == "① 개요":
             )
             pred_base_col = f"{pred_col_display}_Kalman"
 
-            if HAS_DATE and pred_base_col in df.columns:
-                # 개요 페이지 전체 기간 기준이 아닌, 선택된 기간(filtered_df)을 사용할 수도 있음
-                # 현재는 선택 기간 기준 평균으로 단순 추세 계산
-                if not filtered_df.empty and "month" in filtered_df.columns:
+            if pred_base_col in df.columns:
+                if HAS_DATE and not filtered_df.empty and "month" in filtered_df.columns:
                     trend = filtered_df.groupby("month")[pred_base_col].mean().dropna()
                 else:
                     trend = df.groupby("month")[pred_base_col].mean().dropna()
@@ -414,17 +418,32 @@ if page == "① 개요":
 elif page == "② 추세 분석":
     st.subheader("② 추세 분석 · 수질 지표 시간 추세")
 
-    # ---- 분석 기간 선택 (이 페이지 전용) ----
+    filtered_df = df.copy()
+    indicator = AVAILABLE_INDICATORS[0] if AVAILABLE_INDICATORS else None
+
     if HAS_DATE:
         min_date = df["date"].min()
         max_date = df["date"].max()
-        date_range = st.date_input(
-            "분석 기간 선택",
-            value=(min_date, max_date),
-            min_value=min_date,
-            max_value=max_date,
-            key="trend_date_range",
-        )
+
+        # 시계열 제목 + 기간 선택(슬라이더) + 지표 선택 한 줄 배치
+        title_col, ind_col, date_col = st.columns([1.4, 2.0, 2.0])
+        with title_col:
+            st.markdown("#### 시계열 추세 (라인 차트)")
+        with date_col:
+            date_range = st.slider(
+                "분석 기간 선택",
+                min_value=min_date,
+                max_value=max_date,
+                value=(min_date, max_date),
+                key="trend_date_range",
+            )
+        with ind_col:
+            indicator = st.selectbox(
+                "추세를 확인할 수질 지표 선택",
+                options=AVAILABLE_INDICATORS,
+                format_func=lambda x: INDICATOR_MAP.get(x, x),
+                key="trend_indicator",
+            )
 
         if isinstance(date_range, tuple):
             start_date, end_date = date_range
@@ -435,21 +454,24 @@ elif page == "② 추세 분석":
             (df["date"] >= start_date) & (df["date"] <= end_date)
         ].copy()
     else:
-        filtered_df = df.copy()
+        st.markdown("#### 시계열 추세 (라인 차트)")
+        if AVAILABLE_INDICATORS:
+            indicator = st.selectbox(
+                "추세를 확인할 수질 지표 선택",
+                options=AVAILABLE_INDICATORS,
+                format_func=lambda x: INDICATOR_MAP.get(x, x),
+            )
+        else:
+            indicator = None
         st.info("date 컬럼이 없어 전체 기간 기준으로 표시합니다.")
 
     if filtered_df.empty:
         st.info("선택한 기간에 데이터가 없습니다.")
+    elif indicator is None:
+        st.info("표시할 수질 지표가 없습니다.")
     else:
-        indicator = st.selectbox(
-            "추세를 확인할 수질 지표 선택",
-            options=AVAILABLE_INDICATORS,
-            format_func=lambda x: INDICATOR_MAP.get(x, x),
-        )
-
         x_col = "Timestamp" if "Timestamp" in filtered_df.columns else "date"
 
-        st.markdown("#### 시계열 추세 (라인 차트)")
         fig_ts = px.line(
             filtered_df,
             x=x_col,
@@ -507,19 +529,43 @@ elif page == "② 추세 분석":
 # ③ 지표 비교
 # ============================================================
 elif page == "③ 지표 비교":
-    st.subheader("③ 지표 비교 · 월별 수질 지표 비교 분석")
+    # ---- 분석 기간 / 비교 지표를 타이틀 옆에 배치 (슬라이더) ----
+    filtered_df = df.copy()
+    compare_cols = []
 
-    # ---- 분석 기간 선택 (이 페이지 전용) ----
     if HAS_DATE:
         min_date = df["date"].min()
         max_date = df["date"].max()
-        date_range = st.date_input(
-            "분석 기간 선택",
-            value=(min_date, max_date),
-            min_value=min_date,
-            max_value=max_date,
-            key="compare_date_range",
-        )
+
+        title_col, sel_col, date_col = st.columns([1.8, 2.0, 2.8])
+        with title_col:
+            st.subheader("③ 지표 비교 · 월별 수질 지표 비교 분석")
+        with date_col:
+            date_range = st.slider(
+                "분석 기간 선택",
+                min_value=min_date,
+                max_value=max_date,
+                value=(min_date, max_date),
+                key="compare_date_range",
+            )
+        with sel_col:
+            compare_cols = st.multiselect(
+                "비교할 수질 지표 선택 (최대 4개 권장)",
+                options=AVAILABLE_INDICATORS,
+                default=[
+                    c
+                    for c in AVAILABLE_INDICATORS
+                    if c
+                    in [
+                        "Chlorophyll_Kalman",
+                        "Temperature_Kalman",
+                        "Dissolved Oxygen_Kalman",
+                    ]
+                ][:3],
+                format_func=lambda x: INDICATOR_MAP.get(x, x),
+                key="compare_cols_multiselect",
+                help="Kalman 처리된 수질 지표를 기준으로 월별 평균 및 상관관계를 비교합니다.",
+            )
 
         if isinstance(date_range, tuple):
             start_date, end_date = date_range
@@ -530,28 +576,28 @@ elif page == "③ 지표 비교":
             (df["date"] >= start_date) & (df["date"] <= end_date)
         ].copy()
     else:
-        filtered_df = df.copy()
+        st.subheader("③ 지표 비교 · 월별 수질 지표 비교 분석")
+        if AVAILABLE_INDICATORS:
+            compare_cols = st.multiselect(
+                "비교할 수질 지표 선택 (최대 4개 권장)",
+                options=AVAILABLE_INDICATORS,
+                default=[
+                    c
+                    for c in AVAILABLE_INDICATORS
+                    if c
+                    in [
+                        "Chlorophyll_Kalman",
+                        "Temperature_Kalman",
+                        "Dissolved Oxygen_Kalman",
+                    ]
+                ][:3],
+                format_func=lambda x: INDICATOR_MAP.get(x, x),
+            )
         st.info("date 컬럼이 없어 전체 기간 기준으로 표시합니다.")
 
     if filtered_df.empty or "month" not in filtered_df.columns:
         st.info("선택한 기간/데이터로 비교 분석이 어렵습니다.")
     else:
-        compare_cols = st.multiselect(
-            "비교할 수질 지표 선택 (최대 4개 권장)",
-            options=AVAILABLE_INDICATORS,
-            default=[
-                c
-                for c in AVAILABLE_INDICATORS
-                if c
-                in [
-                    "Chlorophyll_Kalman",
-                    "Temperature_Kalman",
-                    "Dissolved Oxygen_Kalman",
-                ]
-            ][:3],
-            format_func=lambda x: INDICATOR_MAP.get(x, x),
-        )
-
         normalize = st.checkbox("지표 간 스케일 표준화 (z-score)", value=False)
 
         if compare_cols:
@@ -645,6 +691,15 @@ elif page == "④ 기준 초과·예측 경보":
             add_risk_bands_plotly(fig_future, y_max)
             fig_future.update_layout(legend_title_text="")
             st.plotly_chart(fig_future, use_container_width=True)
+
+            # 예측값 요약 KPI
+            if "Forecast_Chlorophyll_Kalman" in future_df.columns:
+                vals = future_df["Forecast_Chlorophyll_Kalman"].dropna()
+                if not vals.empty:
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("예측 평균", f"{vals.mean():.2f} µg/L")
+                    c2.metric("예측 최대", f"{vals.max():.2f} µg/L")
+                    c3.metric("예측 최소", f"{vals.min():.2f} µg/L")
 
             # CSV 다운로드
             csv_data = future_df.to_csv(index=False).encode("utf-8-sig")
@@ -818,6 +873,9 @@ elif page == "⑤ 원시데이터·QA·QC":
                 .reset_index()
             )
             raw_missing.columns = ["컬럼", "결측치 개수"]
+            raw_missing["결측률(%)"] = (
+                raw_missing["결측치 개수"] / total_rows * 100
+            ).round(2)
 
             st.markdown("#### ▪ 결측치 현황 (Raw)")
             st.dataframe(raw_missing, use_container_width=True, hide_index=True)
@@ -852,6 +910,9 @@ elif page == "⑤ 원시데이터·QA·QC":
                 .reset_index()
             )
             kal_missing.columns = ["컬럼", "결측치 개수"]
+            kal_missing["결측률(%)"] = (
+                kal_missing["결측치 개수"] / total_rows * 100
+            ).round(2)
 
             st.markdown("#### ▪ 결측치 현황 (Kalman)")
             st.dataframe(kal_missing, use_container_width=True, hide_index=True)
