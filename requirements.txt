@@ -3,3 +3,4 @@ pandas
 lightgbm
 optuna
 scikit-learn
+plotly
