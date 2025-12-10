@@ -21,14 +21,25 @@ st.markdown(
     background: radial-gradient(circle at top, #0b1020 0, #020617 55%, #020617 100%);
     color: #e5e7eb;
 }
+
+/* 기본 padding: 모바일 기준 */
 .block-container {
-    padding-top: 3.5rem;  /* 상단 잘림 방지용 여백 */
+    padding-top: 3.5rem;
     padding-bottom: 2rem;
-    padding-left: 5.0rem;
-    padding-right: 5.0rem;
+    padding-left: 1.2rem;
+    padding-right: 1.2rem;
 }
+
+/* 큰 화면에서만 좌우 여유를 더 줌 */
+@media (min-width: 1200px) {
+  .block-container {
+      padding-left: 5rem;
+      padding-right: 5rem;
+  }
+}
+
 .main-title {
-    font-size: 30px;
+    font-size: clamp(22px, 2.3vw, 30px);
     font-weight: 800;
     margin-bottom: 0.25rem;
     color: #f9fafb;
@@ -49,19 +60,31 @@ st.markdown(
     border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-/* 메인 카드: 좌/우 2열 레이아웃 */
+/* =========================================================
+   메인 카드 (모바일 = 1단, 데스크톱 = 2단)
+   ========================================================= */
 .hero-card {
-    padding: 1.4rem 9.0rem;
+    padding: 1.2rem 1.4rem;
     border-radius: 1.3rem;
     background: radial-gradient(circle at top, #1d2752, #020617);
     color: #e5e7eb;
     box-shadow: 0 20px 40px rgba(15, 60, 42, 0.9);
 
-    height: 320px;
+    /* 모바일 기본: 세로 1단 */
     display: grid;
-    grid-template-columns: 2fr 1.1fr;   /* 왼쪽 텍스트 / 오른쪽 상태 박스 */
-    column-gap: 2rem;
-    align-items: stretch;
+    grid-template-columns: 1fr;
+    row-gap: 1.2rem;
+
+    min-height: 260px;   /* 고정 height 제거 */
+    height: auto;
+}
+
+/* 데스크톱 이상에서만 좌/우 2열 */
+@media (min-width: 900px) {
+  .hero-card {
+      grid-template-columns: 2fr 1.1fr;
+      column-gap: 2rem;
+  }
 }
 
 /* 왼쪽 열: 텍스트 블록 세로 중앙 정렬 */
@@ -87,17 +110,18 @@ st.markdown(
 .hero-main-row {
     display: flex;
     align-items: flex-end;
+    flex-wrap: wrap;           /* 좁은 화면에서 줄바꿈 허용 */
+    gap: 0.2rem;
     margin-top: 0.5rem;
 }
 .hero-main-value {
-    font-size: 3.5rem;
+    font-size: clamp(2.4rem, 6vw, 3.5rem);
     font-weight: 800;
-    line-height: 1;
+    line-height: 1.05;
 }
 .hero-main-unit {
     font-size: 1.1rem;
     opacity: 0.8;
-    margin-left: 0.25rem;
     margin-bottom: 0.3rem;
 }
 
@@ -105,7 +129,7 @@ st.markdown(
     font-size: 0.85rem;
     opacity: 0.75;
     margin-top: 0.4rem;
-    margin-bottom: 0.05rem;   /* 밑 설명과 간격 최소화 */
+    margin-bottom: 0.05rem;
 }
 .hero-subtext {
     font-size: 0.78rem;
@@ -118,36 +142,49 @@ st.markdown(
     margin-top: 0.2rem;
 }
 
-/* 오른쪽 열: 상태 박스를 열 전체로 채우기 */
+/* 오른쪽 열: 상태 박스 */
 .hero-status-box {
     display: flex;
-    align-items: center;      /* 세로로 꽉 차게 */
+    align-items: center;
     justify-content: center;
 }
 
-/* 상태 배지 (좋음/주의/위험) – 큰 캡슐 박스 */
+/* 상태 배지 (좋음/주의/위험) – 반응형 캡슐 박스 */
 .hero-badge {
     width: 100%;
-    height: 50%;
+    max-width: 420px;
+    height: 100%;
+    max-height: 180px;
+
     padding: 0 1.6rem;
     border-radius: 999px;
     background-color: rgba(15, 23, 42, 0.9);
-    border: 2px solid rgba(148, 163, 184, 0.5);  /* 실제 색은 inline style로 덮어씀 */
+    border: 2px solid rgba(148, 163, 184, 0.5);
     box-sizing: border-box;
 
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.6rem;
 }
 .hero-badge span:first-child {
-    font-size: 1.2rem;      /* 이모지 크기 */
+    font-size: 1.4rem;
 }
 .hero-badge-label {
-    font-size: 4.0rem;
-    font-weight: 700;       /* "좋음/주의/위험" */
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 700;
 }
 
+/* 모바일에서 배지 아래쪽으로 여유 */
+@media (max-width: 899px) {
+  .hero-status-box {
+      min-height: 140px;
+  }
+}
+
+/* =========================================================
+   오른쪽의 chip 카드들
+   ========================================================= */
 .chip-box {
     padding: 0.75rem 0.9rem;
     border-radius: 1rem;
@@ -180,6 +217,13 @@ st.markdown(
 .info-text {
     font-size: 0.8rem;
     opacity: 0.75;
+}
+
+/* 아주 작은 화면에서 표, 차트 좌우 여백 줄이기 */
+@media (max-width: 600px) {
+  .section-title {
+      margin-top: 1rem;
+  }
 }
 </style>
 """,
