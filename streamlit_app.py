@@ -24,8 +24,8 @@ st.markdown(
 .block-container {
     padding-top: 3.5rem;  /* 상단 잘림 방지용 여백 */
     padding-bottom: 2rem;
-    padding-left: 20.0rem;
-    padding-right: 20.0rem;
+    padding-left: 5.0rem;
+    padding-right: 5.0rem;
 }
 .main-title {
     font-size: 30px;
