@@ -95,15 +95,13 @@ def build_activity_recommendation(chl, temp, turb, label):
         color = "#22c55e"
         title = "레저 활동하기 좋은 날"
         msg = (
-            f"조류 농도 {chl:.1f} µg/L, 수온 {temp:.1f} °C, 탁도 {turb:.1f} NTU 수준으로 "
-            "카약·패들보드 등 가벼운 수상 레저와 물가 산책을 즐기기 좋습니다. "
+            "카약·패들보드 등 가벼운 수상 레저와 물가 산책을 즐기기 좋습니다."
             "어린이 물놀이는 항상 보호자와 함께해 주세요."
         )
     elif label == "위험" or turb >= 80:
         color = "#ef4444"
         title = "물놀이 자제 권고"
         msg = (
-            f"조류 농도 {chl:.1f} µg/L로 높은 편이며, 탁도 {turb:.1f} NTU 수준입니다. "
             "수영·튜브 등 직접 물에 들어가는 활동은 가급적 피하는 것이 좋습니다. "
             "강 주변 산책이나 조망 위주의 활동을 추천드립니다."
         )
@@ -111,7 +109,7 @@ def build_activity_recommendation(chl, temp, turb, label):
         color = "#eab308"
         title = "가벼운 활동 권장 (주의)"
         msg = (
-            f"조류 농도 {chl:.1f} µg/L, 수온 {temp:.1f} °C 수준으로 일부 시간대에 조류가 다소 높을 수 있습니다. "
+            "일부 시간대에 조류가 다소 높을 수 있습니다. "
             "카약·보트 등은 가능하지만, 물과의 직접 접촉은 줄이고 샤워 등 위생 관리를 신경 써 주세요."
         )
 
@@ -292,7 +290,7 @@ css_block += """
 div[data-testid="stPlotlyChart"] {
     background-color: rgba(15, 23, 42, 0.75);
     border-radius: 1.4rem;
-    padding: 0.8rem 1.0rem 1.0rem 1.0rem;
+    padding: 0.9rem 1.0rem 1.0rem 1.0rem;
     box-shadow: 0 18px 40px rgba(0,0,0,0.45);
     backdrop-filter: blur(18px);
 }
@@ -437,15 +435,15 @@ div[data-testid="stPlotlyChart"] {
 /* 주간 예보 카드 */
 .week-card-header {
     display: flex;
-    align-items: flex-start;        /* ✅ 제목/기간 텍스트 상단 정렬 */
+    align-items: flex-start;
     justify-content: space-between;
     margin-bottom: 0.45rem;
     font-size: 0.86rem;
 }
 .week-card-title {
-    font-size: 1.05rem;            /* ✅ 1) 제목 크기 조절 */
+    font-size: 1.05rem;
     font-weight: 700;
-    transform: translateY(-2px);   /* ✅ 1) 제목 위치 미세조정(위로) */
+    transform: translateY(-2px);
 }
 .week-subtitle {
     font-size: 0.76rem;
@@ -456,7 +454,7 @@ div[data-testid="stPlotlyChart"] {
     margin-top: 0.25rem;
 }
 
-/* ✅ 2) 평균 열 추가로 grid 컬럼 6개로 변경 */
+/* 평균 열 포함 6열 */
 .week-header-row {
     display: grid;
     grid-template-columns: 1.5fr 1.6fr 0.9fr 0.9fr 4.0fr 0.9fr;
@@ -479,25 +477,19 @@ div[data-testid="stPlotlyChart"] {
     text-align: center;
 }
 
-.week-day {
-    font-weight: 500;
-}
+.week-day { font-weight: 500; }
 .week-status {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.25rem;
 }
-.week-emoji {
-    font-size: 1.0rem;
-}
+.week-emoji { font-size: 1.0rem; }
 .week-status-text {
     font-size: 0.78rem;
     opacity: 0.9;
 }
-.week-mean,
-.week-min,
-.week-max {
+.week-mean, .week-min, .week-max {
     font-variant-numeric: tabular-nums;
     opacity: 0.9;
 }
@@ -560,12 +552,12 @@ div[data-testid="stDownloadButton"] button {
     color: #000000 !important;
 }
 
-/* ✅ expander 위쪽 간격 추가 */
+/* expander 위쪽 간격 */
 div[data-testid="stExpander"] {
     margin-top: 1.2rem;
 }
 
-/* ✅ expander 내용 전체를 카드처럼 */
+/* expander 내용 카드화 */
 div[data-testid="stExpanderDetails"] {
     background-color: rgba(15, 23, 42, 0.75);
     border-radius: 1.4rem;
@@ -575,26 +567,25 @@ div[data-testid="stExpanderDetails"] {
     border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
-/* ✅ expander 안 Plotly는 '카드 중복' 제거 */
+/* expander 안 Plotly 카드 중복 제거 */
 div[data-testid="stExpanderDetails"] div[data-testid="stPlotlyChart"] {
     background-color: transparent !important;
     box-shadow: none !important;
     padding: 0 !important;
 }
 
-/* (선택) expander 안 DataFrame 정리 */
+/* expander 안 DataFrame */
 div[data-testid="stExpanderDetails"] div[data-testid="stDataFrame"] {
     border-radius: 1.0rem;
     overflow: hidden;
     border: 1px solid rgba(148, 163, 184, 0.35);
 }
 
-/* ✅ 슬라이더/셀렉트 라벨 흰색 */
+/* 슬라이더/셀렉트 라벨 흰색 */
 div[data-testid="stSlider"] label,
 div[data-testid="stSelectbox"] label {
     color: #f9fafb !important;
 }
-
 </style>
 """
 
@@ -773,28 +764,6 @@ else:
         period_end = daily["date"].max()
         period_text = f"{period_start.strftime('%m월 %d일')} ~ {period_end.strftime('%m월 %d일')}"
 
-        # 최대 예보 문구(날짜/수치 강조)
-        max_info_text = None
-        if forecast_df is not None and not forecast_df.empty:
-            idxmax = forecast_df["Forecast_Chlorophyll_Kalman"].idxmax()
-            max_future_value = forecast_df.loc[idxmax, "Forecast_Chlorophyll_Kalman"]
-            max_future_time = forecast_df.loc[idxmax, "Timestamp"]
-
-            if pd.notna(max_future_value) and pd.notna(max_future_time):
-                lab, emo, _, _ = classify_chl(max_future_value)
-                t_txt = max_future_time.strftime("%Y-%m-%d %H:%M")
-
-                date_color = "#60a5fa"
-                value_color = "#f97316"
-
-                max_info_text = (
-                    "가장 조류 농도가 높게 예보된 시점은 "
-                    f"<span style='color:{date_color}; font-weight:700;'>{t_txt}</span>"
-                    "이며, 예측값은 약 "
-                    f"<span style='color:{value_color}; font-weight:800;'>{max_future_value:.1f} µg/L</span>"
-                    f" ({emo} {lab}) 입니다."
-                )
-
         st.markdown(
             '<div class="info-text" style="margin-top:0.4rem; margin-bottom:0.15rem;">라인 그래프 조회 일자</div>',
             unsafe_allow_html=True,
@@ -818,6 +787,33 @@ else:
 
         if not line_df.empty:
             y_max = max(line_df["Forecast_Chlorophyll_Kalman"].max(), 10)
+
+            # ✅ 선택 범위 기준 최대 예보 문구 생성 (모바일/해상도 안정: title 2줄로 출력)
+            scope_label = "전체 기간" if selected_line_date is None else selected_line_date.strftime("%m/%d")
+            max_info_text = ""
+
+            if line_df["Forecast_Chlorophyll_Kalman"].notna().any():
+                idxmax = line_df["Forecast_Chlorophyll_Kalman"].idxmax()
+                max_future_value = float(line_df.loc[idxmax, "Forecast_Chlorophyll_Kalman"])
+                max_future_time = pd.to_datetime(line_df.loc[idxmax, "Timestamp"])
+
+                lab, emo, _, _ = classify_chl(max_future_value)
+                t_txt = max_future_time.strftime("%Y-%m-%d %H:%M")
+
+                date_color = "#60a5fa"
+                value_color = "#f97316"
+
+                max_info_text = (
+                    f"이번주 [{scope_label}] 중 가장 조류 농도가 높게 예보된 시점은 "
+                    f"<span style='color:{date_color}; font-weight:800;'>{t_txt}</span>이며, "
+                    f"예측값은 약 <span style='color:{value_color}; font-weight:900;'>{max_future_value:.1f} µg/L</span>"
+                    f" ({emo} {lab}) 입니다."
+                )
+
+            title_html = (
+                "<span style='font-size:20px; font-weight:900;'>이번주 시간별 조류 농도 추세</span>"
+                + (f"<br><span style='font-size:16px; font-weight:600;'>{max_info_text}</span>" if max_info_text else "")
+            )
 
             x = line_df["Timestamp"]
             y = line_df["Forecast_Chlorophyll_Kalman"]
@@ -849,8 +845,8 @@ else:
             ))
 
             fig.update_layout(
-                height=260,
-                margin=dict(l=10, r=10, t=45, b=95),
+                height=330,
+                margin=dict(l=10, r=10, t=90, b=35),
                 showlegend=False,
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
@@ -872,22 +868,13 @@ else:
                     tickfont=dict(color="#ffffff", size=11),
                 ),
                 title=dict(
-                    text="이번주 시간별 조류 농도 추세",
-                    x=0.00, xanchor="left",
-                    y=0.95, yanchor="top",
-                    font=dict(size=18, color="#ffffff"),
+                    text=title_html,
+                    x=0.01, xanchor="left",
+                    y=0.94, yanchor="top",
+                    font=dict(color="#ffffff"),
+                    pad=dict(t=8, b=8),
                 ),
             )
-
-            if max_info_text:
-                fig.add_annotation(
-                    x=-0.02, y=-0.50, xref="paper", yref="paper",
-                    text=max_info_text,
-                    showarrow=False,
-                    xanchor="left", yanchor="bottom",
-                    align="left",
-                    font=dict(size=16, color="#ffffff"),
-                )
 
             st.plotly_chart(fig, use_container_width=True)
         else:
